@@ -7,6 +7,7 @@ import cz.codingmonkey.observer.events.Event;
 import cz.codingmonkey.observer.events.EventSubscriber;
 import rx.Observable;
 import rx.Subscription;
+import rx.schedulers.Schedulers;
 
 /**
  * @author Richard Stefanca
@@ -20,14 +21,16 @@ public class SystemWithEmailAttribute implements EventSubscriber {
     }
 
     public Subscription subscribe(Observable<Event> observable) {
-        return observable.subscribe(event -> {
-            if (event instanceof EntityChangedEvent) { //listens only to changed entities
-                EntityChangedEvent entityChangedEvent = (EntityChangedEvent) event;
-                if (entityChangedEvent.contains("email")) {
-                    changeEmail(((Identity) entityChangedEvent.getEntity()));
-                }
-            }
-        });
+        return observable.
+                //subscribeOn(Schedulers.io()). //if you want to do some io or remote operations
+                        subscribe(event -> {
+                    if (event instanceof EntityChangedEvent) { //listens only to changed entities
+                        EntityChangedEvent entityChangedEvent = (EntityChangedEvent) event;
+                        if (entityChangedEvent.contains("email")) {
+                            changeEmail(((Identity) entityChangedEvent.getEntity()));
+                        }
+                    }
+                });
     }
 
     private void changeEmail(Identity entity) {
